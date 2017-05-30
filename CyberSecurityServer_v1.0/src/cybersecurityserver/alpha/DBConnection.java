@@ -1,0 +1,60 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package cybersecurityserver.alpha;
+
+import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
+import dblib.DatabaseUtils;
+import dblib.exception.DatabaseCreationException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
+
+/**
+ * This Class Contain only one static method and it is used for obtaining the connection with database
+ */
+public class DBConnection {
+/**
+     *This method will make the connectivity with database and returns the reference of Connection type
+     *@return Connection
+     */
+   private static String USERNAME = "root", PASSWORD = "root", SCRIPT_FILENAME = "Script_CyberSecurity.sql", DATABASE_NAME = "cybersecurity";
+
+    static Preferences preferences = Preferences.userRoot();
+
+    public static void loadLib() {
+        try {
+            if (!preferences.getBoolean("db_" + DATABASE_NAME, false)) {
+                DatabaseUtils.connectDB(DBConnection.class, SCRIPT_FILENAME);
+                preferences.putBoolean("db_" + DATABASE_NAME, true);
+                preferences.flush();
+            }
+        } catch (DatabaseCreationException e) {
+            System.out.println(e.toString());
+        } catch (BackingStoreException e) {
+            System.out.println(e.toString());
+        }
+    }
+
+    public static Connection getConnection() {
+        Connection con = null;
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            con = DriverManager.getConnection("jdbc:mysql:///" + DATABASE_NAME, USERNAME, PASSWORD);
+        } catch (MySQLSyntaxErrorException e) {
+            preferences.remove("db_" + DATABASE_NAME);
+            loadLib();
+            try {
+                con = DriverManager.getConnection("jdbc:mysql:///" + DATABASE_NAME, USERNAME, PASSWORD);
+            } catch (Exception ex) {
+                System.out.println("Exception in getConnection of DBConnection : " + e);
+            }
+        } catch (Exception e) {
+
+            System.out.println("Exception in getConnection of DBConnection : " + e);
+        }
+        return con;
+    }
+}

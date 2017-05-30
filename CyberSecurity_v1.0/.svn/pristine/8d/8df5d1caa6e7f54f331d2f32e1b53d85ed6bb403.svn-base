@@ -1,0 +1,5 @@
+
+rootFolder=c:\\RemoteObserverClient
+portToConnect = 5219
+serverIP = localhost
+serverFolder =c:\\RemoteObserverServer
